@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const NavigationBar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -19,10 +20,10 @@ const NavigationBar = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
-            <a href="/" className="flex items-center space-x-2">
+            <Link to="/" className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-primary rounded-lg"></div>
               <span className="text-xl font-semibold">AImagine</span>
-            </a>
+            </Link>
           </div>
 
           {isMobile ? (
@@ -44,8 +45,8 @@ const NavigationBar = () => {
                     {item.label}
                   </a>
                 ))}
-                <Button variant="default" size="sm">
-                  Get Started
+                <Button variant="default" size="sm" asChild>
+                  <Link to="/auth">Get Started</Link>
                 </Button>
               </div>
             </div>
@@ -67,8 +68,8 @@ const NavigationBar = () => {
               </a>
             ))}
             <div className="pt-2">
-              <Button className="w-full" variant="default" size="sm">
-                Get Started
+              <Button className="w-full" variant="default" size="sm" asChild>
+                <Link to="/auth">Get Started</Link>
               </Button>
             </div>
           </div>

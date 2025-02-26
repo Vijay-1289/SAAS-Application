@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { ChevronRight, Zap } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const HeroSection = () => {
   return (
@@ -31,9 +32,11 @@ const HeroSection = () => {
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Button size="lg" className="w-full sm:w-auto">
-              Get Started
-              <ChevronRight className="w-4 h-4 ml-2" />
+            <Button size="lg" className="w-full sm:w-auto" asChild>
+              <Link to="/auth">
+                Get Started
+                <ChevronRight className="w-4 h-4 ml-2" />
+              </Link>
             </Button>
             <Button
               size="lg"

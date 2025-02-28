@@ -7,10 +7,10 @@ import {
   Image,
   Settings,
   User,
-  Menu,
   Wand2,
   Eraser,
   XCircle,
+  ShoppingCart,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -33,7 +33,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [credits, setCredits] = useState<number>(0);
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [processingFeature, setProcessingFeature] = useState<string | null>(null);
 
   useEffect(() => {
     checkUser();
@@ -73,6 +73,8 @@ const Dashboard = () => {
 
   const handleFeatureUse = async (featureName: string, creditCost: number) => {
     try {
+      setProcessingFeature(featureName);
+      
       if (credits < creditCost) {
         toast.error("Insufficient credits! Please upgrade your plan.");
         return;
@@ -101,9 +103,17 @@ const Dashboard = () => {
 
       setCredits(credits - creditCost);
       toast.success(`${featureName} activated! ${creditCost} credits used`);
+      
+      // Here you would typically start the actual AI feature
+      // For demonstration purposes, we'll just simulate a success
+      setTimeout(() => {
+        toast.success(`${featureName} completed successfully!`);
+      }, 2000);
     } catch (error: any) {
       console.error("Error processing request:", error);
       toast.error("Error processing request");
+    } finally {
+      setProcessingFeature(null);
     }
   };
 
@@ -171,6 +181,15 @@ const Dashboard = () => {
               <div className="text-sm font-medium">
                 Credits: <span className="text-primary">{credits}</span>
               </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => navigate("/pricing")}
+              >
+                <ShoppingCart className="w-4 h-4" />
+                Buy Credits
+              </Button>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="gap-2">
@@ -225,9 +244,16 @@ const Dashboard = () => {
                     <Button
                       variant="outline"
                       onClick={feature.action}
-                      disabled={credits < feature.credits}
+                      disabled={processingFeature === feature.title || credits < feature.credits}
                     >
-                      Use Feature
+                      {processingFeature === feature.title ? (
+                        <>
+                          <span className="animate-spin mr-2">⚙️</span>
+                          Processing...
+                        </>
+                      ) : (
+                        "Use Feature"
+                      )}
                     </Button>
                   </div>
                 </div>

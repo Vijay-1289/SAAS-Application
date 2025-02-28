@@ -71,7 +71,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleFeatureUse = async (featureName: string, creditCost: number) => {
+  const handleFeatureUse = async (featureName: string, creditCost: number, redirectPath?: string) => {
     try {
       setProcessingFeature(featureName);
       
@@ -104,15 +104,19 @@ const Dashboard = () => {
       setCredits(credits - creditCost);
       toast.success(`${featureName} activated! ${creditCost} credits used`);
       
-      // Here you would typically start the actual AI feature
-      // For demonstration purposes, we'll just simulate a success
-      setTimeout(() => {
-        toast.success(`${featureName} completed successfully!`);
-      }, 2000);
+      // If a redirect path is provided, navigate to that page
+      if (redirectPath) {
+        navigate(redirectPath);
+      } else {
+        // For features without dedicated pages, simulate success
+        setTimeout(() => {
+          toast.success(`${featureName} completed successfully!`);
+          setProcessingFeature(null);
+        }, 2000);
+      }
     } catch (error: any) {
       console.error("Error processing request:", error);
       toast.error("Error processing request");
-    } finally {
       setProcessingFeature(null);
     }
   };
@@ -141,7 +145,7 @@ const Dashboard = () => {
       description: "Generate stunning images using AI",
       color: "bg-purple-500",
       credits: 10,
-      action: () => handleFeatureUse("AI Image Generation", 10),
+      action: () => handleFeatureUse("AI Image Generation", 10, "/ai-image-generation"),
     },
     {
       title: "AI Image Enhancer",

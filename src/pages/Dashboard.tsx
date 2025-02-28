@@ -61,11 +61,12 @@ const Dashboard = () => {
         .from('user_credits')
         .select('credits_balance')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
-      setCredits(data.credits_balance);
+      setCredits(data?.credits_balance || 0);
     } catch (error: any) {
+      console.error("Error fetching credits:", error);
       toast.error("Error fetching credit balance");
     }
   };
@@ -83,7 +84,7 @@ const Dashboard = () => {
         .update({ credits_balance: credits - creditCost })
         .eq('user_id', user.id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (updateError) throw updateError;
 
@@ -101,6 +102,7 @@ const Dashboard = () => {
       setCredits(credits - creditCost);
       toast.success(`${featureName} activated! ${creditCost} credits used`);
     } catch (error: any) {
+      console.error("Error processing request:", error);
       toast.error("Error processing request");
     }
   };

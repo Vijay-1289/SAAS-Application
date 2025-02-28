@@ -1,1 +1,17 @@
+
 project_id = "sikbkeyzzqhkznvrsszl"
+[api]
+enabled = true
+[auth]
+enabled = true
+[db]
+enabled = true
+[realtime]
+enabled = true
+[storage]
+enabled = true
+[functions]
+enabled = true
+
+[[functions.generate-image]]
+verify_jwt = false

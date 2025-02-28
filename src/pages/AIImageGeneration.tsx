@@ -13,29 +13,47 @@ const AIImageGeneration = () => {
   const [prompt, setPrompt] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [remainingCredits, setRemainingCredits] = useState<number | null>(null);
 
-  // Mock function to simulate AI image generation
-  // In a real app, this would call an API endpoint connected to an AI service
   const generateImage = async (promptText: string) => {
     setGenerating(true);
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Get the user's session
+      const { data: { session } } = await supabase.auth.getSession();
       
-      // For demo purposes, we're using a placeholder image
-      // In a real implementation, this would be the URL returned from your AI service
-      const demoImageUrl = "https://source.unsplash.com/random/512x512/?"+encodeURIComponent(promptText);
-      setGeneratedImage(demoImageUrl);
-      
-      // Log the generation in transaction history
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('ai_generations').insert({
-          user_id: user.id,
-          prompt: promptText,
-          type: 'image_generation',
-          result_url: demoImageUrl,
-        }).maybeSingle();
+      if (!session) {
+        toast.error("You must be logged in to generate images");
+        navigate("/auth");
+        return;
+      }
+
+      // Call the Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke("generate-image", {
+        body: { prompt: promptText },
+      });
+
+      if (error) {
+        console.error("Error calling generate-image function:", error);
+        toast.error(error.message || "Failed to generate image");
+        return;
+      }
+
+      if (data.error) {
+        console.error("Error from generate-image function:", data.error);
+        
+        // Handle insufficient credits specifically
+        if (data.creditsNeeded && data.currentCredits !== undefined) {
+          toast.error(`Not enough credits. You need ${data.creditsNeeded} credits but have ${data.currentCredits}.`);
+        } else {
+          toast.error(data.error);
+        }
+        return;
+      }
+
+      // Set the generated image and update remaining credits
+      setGeneratedImage(data.image);
+      if (data.remainingCredits !== undefined) {
+        setRemainingCredits(data.remainingCredits);
       }
       
       toast.success("Image generated successfully!");
@@ -86,6 +104,11 @@ const AIImageGeneration = () => {
               </Button>
               <span className="text-xl font-bold">AI Image Generation</span>
             </div>
+            {remainingCredits !== null && (
+              <div className="text-sm text-muted-foreground">
+                Credits Remaining: <span className="font-semibold">{remainingCredits}</span>
+              </div>
+            )}
           </div>
         </div>
       </nav>
@@ -99,6 +122,7 @@ const AIImageGeneration = () => {
             <p className="text-muted-foreground mb-6">
               Enter a detailed description of the image you want to generate.
               The more specific your prompt, the better the results.
+              <span className="block mt-2 font-medium">Cost: 10 credits per image</span>
             </p>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
